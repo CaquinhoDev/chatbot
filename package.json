@@ -1,0 +1,24 @@
+{
+  "name": "krzbot",
+  "version": "1.0.0",
+  "description": "A simple WhatsApp chatbot",
+  "nodemonConfig": {
+    "ignore": [
+      "node_modules/",
+      "auth_info_baileys/"
+    ]
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js --dev"
+  },
+  "author": "Juniorkrz#7721",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.5.0",
+    "dotenv": "^16.3.1",
+    "nodemon": "^3.0.2",
+    "qrcode-terminal": "^0.12.0",
+    "qs": "^6.12.0"
+  },
+  "license": "MIT"
+}
