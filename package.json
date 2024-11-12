@@ -1,5 +1,5 @@
 {
-  "name": "krzbot",
+  "name": "chatbot",
   "version": "1.0.0",
   "description": "A simple WhatsApp chatbot",
   "nodemonConfig": {
@@ -12,7 +12,7 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js --dev"
   },
-  "author": "Juniorkrz#7721",
+  "author": "Caquinhodev",
   "dependencies": {
     "@whiskeysockets/baileys": "^6.5.0",
     "dotenv": "^16.3.1",
