@@ -60,7 +60,7 @@ function obterTelefoneDoJid(jid) {
   return jidNormalizedUser(jid).split("@")[0];
 }
 
-// Função para reagir à mensagem com um emoji
+// Função para reagir à mensagem com um emoji específico
 async function reagirMensagem(mensagem, reacao) {
   const mensagemReacao = {
     react: {
@@ -71,127 +71,19 @@ async function reagirMensagem(mensagem, reacao) {
   return await cliente.sendMessage(mensagem.key.remoteJid, mensagemReacao);
 }
 
-// Função para reagir à mensagem com um emoji aleatório
-async function reagirMensagemAleatoria(mensagem) {
-  const emojis = [
-    "😀",
-    "😃",
-    "😄",
-    "😁",
-    "😆",
-    "😅",
-    "😂",
-    "🤣",
-    "😊",
-    "😇",
-    "🙂",
-    "🙃",
-    "😉",
-    "😌",
-    "😍",
-    "🥰",
-    "😘",
-    "😗",
-    "😙",
-    "😚",
-    "🥲",
-    "😋",
-    "😛",
-    "😜",
-    "🤪",
-    "😝",
-    "🤑",
-    "🤗",
-    "🤭",
-    "🤫",
-    "🤔",
-    "🤐",
-    "🤨",
-    "😐",
-    "😑",
-    "😶",
-    "😶‍🌫️",
-    "😏",
-    "😒",
-    "🙄",
-    "😬",
-    "😮‍💨",
-    "🤥",
-    "😌",
-    "😔",
-    "😪",
-    "🤤",
-    "😴",
-    "😷",
-    "🤒",
-    "🤕",
-    "🤢",
-    "🤮",
-    "🤧",
-    "🥵",
-    "🥶",
-    "🥴",
-    "😵",
-    "😵‍💫",
-    "🤯",
-    "🤠",
-    "🥳",
-    "🥸",
-    "😎",
-    "🤓",
-    "🧐",
-    "😕",
-    "😟",
-    "🙁",
-    "☹️",
-    "😮",
-    "😯",
-    "😲",
-    "😳",
-    "🥺",
-    "😦",
-    "😧",
-    "😨",
-    "😰",
-    "😥",
-    "😢",
-    "😭",
-    "😱",
-    "😖",
-    "😣",
-    "😞",
-    "😓",
-    "😩",
-    "😫",
-    "🥱",
-    "😤",
-    "😡",
-    "😠",
-    "🤬",
-    "😈",
-    "👿",
-    "💀",
-    "☠️",
-    "💩",
-    "🤡",
-    "👹",
-    "👺",
-    "👻",
-    "👽",
-    "👾",
-    "🤖",
-    "😺",
-    "😸",
-    "😹",
-    "😻",
-    "😼",
-    "😽",
-    "🙀",
-    "😿",
-    "😾",
-  ];
-  const emojiAleatorio = emojis[Math.floor(Math.random() * emojis.length)];
-  return await reagirMensagem(mensagem, emojiAleatorio);
+// Função para reagir com um emoji de espera (ampulheta) e depois substituir pelo emoji final
+async function reagirComEsperaEFinal(mensagem, respostaApi) {
+  // Reage inicialmente com uma ampulheta (espera)
+  await reagirMensagem(mensagem, "⏳");
+
+  // Espera a resposta da API
+  const resposta = await respostaApi;
+
+  // Reage com um emoji aleatório definido no código após a resposta da API
+  const emojisFinal = spin_text("{😀|😃|😄|😁|😆|😊|😉|😍}");
+  await reagirMensagem(mensagem, emojisFinal);
+
+  return resposta;
 }
 
 // Função para enviar uma mensagem
@@ -227,6 +119,20 @@ function deveResponder(mensagem) {
   );
 }
 
+// Função para simular o bot "digitando" antes de enviar a resposta
+// Função para simular o bot "digitando" antes de enviar a resposta
+async function digitarMensagem(mensagem) {
+  // Atualiza o status para 'digitando'
+  await cliente.sendPresenceUpdate("composing", mensagem.key.remoteJid);
+
+  // Simula o "digitando..." por 1-3 segundos
+  await delay(Math.random() * (3000 - 1000) + 1000); // Delay aleatório entre 1 e 3 segundos
+  console.log("Bot está digitando...");
+
+  // Após o "digitando", podemos atualizar o status para 'paused' (parado)
+  await cliente.sendPresenceUpdate("paused", mensagem.key.remoteJid);
+}
+
 // Função para lidar com a mensagem recebida
 async function lidarComMensagemRecebida(mensagem) {
   if (
@@ -251,11 +157,14 @@ async function lidarComMensagemRecebida(mensagem) {
       resposta = "Modo desenvolvedor está ativo!";
       reagirMensagem(mensagem, spin_text("{🛠|⚙|🔧|⚒|🪚|🤖}"));
     } else {
-      // aparecer "digitando..." no whatsapp
-      // await cliente.presenceSubscribe(mensagem.key.remoteJid);
-      // await delay(500);
-      // await cliente.sendPresenceUpdate("composing", mensagem.key.remoteJid);
-      resposta = await conversaSimSimi(mensagemRemetente);
+      // Simula o "digitando..." antes de buscar a resposta da API
+      await digitarMensagem(mensagem);
+
+      // Aguardando resposta da API SimSimi com reação inicial de espera e final de emoji aleatório
+      resposta = await reagirComEsperaEFinal(
+        mensagem,
+        conversaSimSimi(mensagemRemetente)
+      );
     }
 
     if (!resposta) {
@@ -265,11 +174,6 @@ async function lidarComMensagemRecebida(mensagem) {
 
     console.log("O bot respondeu: " + resposta);
     await enviarMensagem(mensagem, resposta);
-
-    // Reage com um emoji aleatório no modo normal
-    if (!modoDev) {
-      await reagirMensagemAleatoria(mensagem);
-    }
   }
 }
 
